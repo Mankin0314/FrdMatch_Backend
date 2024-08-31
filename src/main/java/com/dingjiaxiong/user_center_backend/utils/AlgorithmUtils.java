@@ -1,19 +1,15 @@
 package com.dingjiaxiong.user_center_backend.utils;
 
+import java.util.List;
+import java.util.Objects;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.dingjiaxiong.user_center_backend.common.ErrorCode;
-import com.dingjiaxiong.user_center_backend.exception.BusinessException;
-import com.dingjiaxiong.user_center_backend.model.domain.User;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.util.*;
-
-
+/**
+ * 算法工具类
+ *
+ * @author yupi
+ */
 public class AlgorithmUtils {
+
     /**
      * 编辑距离算法（用于计算最相似的两组标签）
      *
@@ -52,32 +48,42 @@ public class AlgorithmUtils {
         return d[n][m];
     }
 
+    /**
+     * 编辑距离算法（用于计算最相似的两个字符串）
+     * 原理：https://blog.csdn.net/DBC_121/article/details/104198838
+     *
+     * @param word1
+     * @param word2
+     * @return
+     */
+    public static int minDistance(String word1, String word2) {
+        int n = word1.length();
+        int m = word2.length();
 
-
-/*    @Override
-    public List<User> searchUsersByTags(List<String> tagNameList) {
-        if (CollectionUtils.isEmpty(tagNameList)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        if (n * m == 0) {
+            return n + m;
         }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        List<User> userList = userMapper.selectList(queryWrapper);
-        Gson gson = new Gson();
-        //2.在内存中判断是否包含要求的标签
-        return userList.stream().filter(user -> {
-            String tagsStr = user.getTags();
-            if (StringUtils.isBlank(tagsStr)) {
-                return false;
-            }
-            Set<String> tempTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
-            }.getType());
-            // Java8 Optional.ofNullable判断为空
-            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
-            for (String tagName : tagNameList) {
-                if (!tempTagNameSet.contains(tagName)) {
-                    return false;
+
+        int[][] d = new int[n + 1][m + 1];
+        for (int i = 0; i < n + 1; i++) {
+            d[i][0] = i;
+        }
+
+        for (int j = 0; j < m + 1; j++) {
+            d[0][j] = j;
+        }
+
+        for (int i = 1; i < n + 1; i++) {
+            for (int j = 1; j < m + 1; j++) {
+                int left = d[i - 1][j] + 1;
+                int down = d[i][j - 1] + 1;
+                int left_down = d[i - 1][j - 1];
+                if (word1.charAt(i - 1) != word2.charAt(j - 1)) {
+                    left_down += 1;
                 }
+                d[i][j] = Math.min(left, Math.min(down, left_down));
             }
-            return true;
-        }).map(this::getSafetyUser).collect(Collectors.toList());
-    }*/
+        }
+        return d[n][m];
+    }
 }

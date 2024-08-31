@@ -55,7 +55,7 @@ public class InsertUsersTest {
     public void doConcurrentInsertUsers(){
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        final int INSERT_NUM = 100000;
+        final int INSERT_NUM = 1000000;
         //分十组
         int batchSize = 2500;
         int j =0 ;
