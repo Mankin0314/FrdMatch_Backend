@@ -3,6 +3,7 @@ package com.dingjiaxiong.user_center_backend.model.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -68,7 +69,10 @@ public class TeamUserVO implements Serializable {
     List<UserVO> userList;
 
     //创建人入队列表
+    private UserVO createUser;
 
-    UserVO createUser;
+    private Integer hasJoinNum;
+
+    private boolean hasJoin = false;
 
 }

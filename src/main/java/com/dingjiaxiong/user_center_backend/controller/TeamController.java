@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -121,10 +122,35 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean isAdmin = userService.isAdmin(request);
-
+        //全部TeamUser
         List<TeamUserVO> list = teamService.listTeams(teamQuery, isAdmin);
       /*  QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         List<Team> teams = teamMapper.selectList(queryWrapper);*/
+        //判断当前用户是否已加入队伍
+        //TeamIdList是全部队伍ID
+        List<Long> TeamIdList = list.stream().map(TeamUserVO :: getId).collect(Collectors.toList());
+        System.out.println(TeamIdList);
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        try {
+            User loginUser = userService.getLoginUser(request);
+            queryWrapper.eq("userId",loginUser.getId());
+            queryWrapper.in("teamId",TeamIdList);
+            List<UserTeam> joinedList = userTeamService.list(queryWrapper);
+            Set<Long> joinedTeamIdSet = joinedList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            list.forEach(team ->{
+                boolean hasJoin = joinedTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });}catch (Exception e){
+            }
+
+        //查询已加入队伍的用户信息(人数)
+        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+        userTeamJoinQueryWrapper.in("teamId", TeamIdList);
+        List<UserTeam> userTeamList = userTeamService.list(userTeamJoinQueryWrapper);
+        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        list.forEach(team ->{
+            team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size());
+        });
 
         return ResultUtils.success(list);
     }
